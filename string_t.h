@@ -9,6 +9,11 @@ typedef struct String {
   size_t cap;
   char value[];
 } String;
+typedef struct{
+    String **data;
+    size_t size;
+    size_t cap;
+}StringArray;
 void *ptrWrapper_s(void *ptr, int32_t line, const char *file);
 #define ptrWrapper(ptr) (ptrWrapper_s(ptr, __LINE__, __FILE__))
 // does a malloc but 'safe'
@@ -18,15 +23,17 @@ String *newString(const char string[]);
 // do a string for a force move or copy to string->value
 String *implicitString(String *str);
 void appendString(String *str, const char string[]);
-// actually you could do string->value and get the value from that, but
-// I'm lazy so I made a func for do that and set a nul term to the end of the array
+// string to const char*
 const char *c_str(String *str);
 int stringCmp(String *str1, String *str2);
 void clearString(String *str);
+// get the specific char of a string with error handlig
 char atString(String *str, size_t index);
 void putcharString(String *str, char ch);
 void mvStrings(String *dest,String *src);
 void mvCharpToString(String *dest,const char*src);
+StringArray *newStringArray_s(size_t capacity,...);
+StringArray *concatToStringArray(StringArray *arr,char *str);
 #ifdef STRING_IMP
 void *ptrWrapper_s(void *ptr, int32_t line, const char *file) {
   if (ptr == NULL) {
@@ -126,5 +133,35 @@ void mvCharpToString(String *dest,const char*src){
     dest->size=strlen(src); 
     memmove(dest->value,src,strlen(src)-1);
     dest->cap=strlen(src)-1;
+}
+StringArray *newStringArray_s(size_t capacity,...){
+    va_list args;
+    va_start(args,capacity);
+    StringArray *arr=allocPtr(sizeof(String));
+    arr->data=allocPtr(sizeof(String*));
+    size_t pos=0;
+    while (true) {
+        const char* arg=va_arg(args,const char*);
+        if (arg==NULL) {
+            break; 
+        }
+        String *item=newString(arg); 
+        ptrWrapper(item);
+        arr->size+=item->size; 
+        assert(arr->size!=arr->cap);
+        arr->data[pos++]=item;
+        ++arr->cap;
+    }  
+    va_end(args);
+    return ptrWrapper(arr);
+}
+#define newStringArray(...) (newStringArray_s(1,__VA_ARGS__,NULL))
+StringArray *concatToStringArray(StringArray *arr,char *str){
+    ptrWrapper(str);
+    ptrWrapper(arr);
+    String *new=newString(str);
+    arr->size+=new->size;
+    arr->data[arr->cap++]=new;
+    return ptrWrapper(arr);
 }
 #endif // STRING_IMP
