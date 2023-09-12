@@ -47,6 +47,10 @@ bool strEq(String *a, String *b);
 // is the same as strsub of C++
 void strCut(String *str, uint32_t start, uint32_t end);
 const char* c_str(String *str);
+void strConcat(String *a,String *b);
+void pushCharStr(String *a,char ch);
+void popStr(String *a);
+void popCountStr(String *a,uint32_t count);
 #ifdef STRING_IMP
 void *ptrWrapper_s(void *ptr, int32_t line, const char *file) {
   if (ptr == NULL) {
@@ -60,7 +64,7 @@ void *allocPtr(size_t size) {
   return ptrWrapper(ptr);
 }
 String *allocStr(size_t size) {
-  String *str = (String *)STR_MALLOC(sizeof(String) + size);
+  String *str = (String *)allocPtr(sizeof(String) + size);
   str->size = size;
   return str;
 }
@@ -91,6 +95,13 @@ void implicitStr(String *str){
        size_t lengh=strlen(str->value);  
        str->size=lengh;
 }
+void strConcat(String *a,String *b){
+    char *c=allocPtr(a->size+b->size*sizeof(char));
+    memcpy(c,a->value,a->size);
+    memcpy(c+strlen(c),b->value,b->size);
+    memmove(a->value,c,strlen(c));
+    implicitStr(a);
+}
 String *newStr(const char arr[]){
     size_t size=strlen(arr);
     String *str=allocStr(size);
@@ -107,8 +118,25 @@ void strCut(String *str, uint32_t start, uint32_t end) {
     memmove(str->value, mv_str,end);
     implicitStr(str);
 }
+
 const char* c_str(String *str){
    str->value[str->size] = '\0';  
    return str->value;
+}
+void pushCharStr(String *a,char ch){
+    char *av=a->value;
+    memcpy(av+a->size,&ch,sizeof(char));
+    memcpy(a->value,av,strlen(av));
+    implicitStr(a);
+}
+void popStr(String *a){
+    a->value[a->size-1]='\0'; 
+    implicitStr(a);
+}
+void popCountStr(String *a,uint32_t count){
+    while (count!=0) {
+        popStr(a);
+        --count;
+    }  
 }
 #endif // END OF STRING_IMP
