@@ -64,7 +64,7 @@ void *allocPtr(size_t size) {
   return ptrWrapper(ptr);
 }
 String *allocStr(size_t size) {
-  String *str = (String *)allocPtr(sizeof(String) + size);
+  String *str = (String *)STR_MALLOC(sizeof(String) + size);
   str->size = size;
   return str;
 }
