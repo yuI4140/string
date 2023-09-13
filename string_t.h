@@ -51,6 +51,16 @@ void strConcat(String *a,String *b);
 void pushCharStr(String *a,char ch);
 void popStr(String *a);
 void popCountStr(String *a,uint32_t count);
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+char *intToString(int num);
+char *floatToString(float num);
+#define NEW_STR(x)                                                             \
+  _Generic((x),                                                                \
+      int: newStr(intToString(x)),                                             \
+      float: newStr(floatToString(x)),                                         \
+      double: newStr(floatToString(x)),                                        \
+      default: NULL)
+#endif
 #ifdef STRING_IMP
 void *ptrWrapper_s(void *ptr, int32_t line, const char *file) {
   if (ptr == NULL) {
@@ -139,4 +149,27 @@ void popCountStr(String *a,uint32_t count){
         --count;
     }  
 }
+// the follow funcs are not especific from >=C11 but for not add garbage
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+char *intToString(int num) {
+  char *str = (char *)malloc(20);
+  if (str == NULL) {
+    perror("Memory allocation failed");
+    exit(EXIT_FAILURE);
+  }
+
+  snprintf(str, 20, "%d", num);
+  return str;
+}
+char *floatToString(float num) {
+  char *str = (char *)malloc(20);
+  if (str == NULL) {
+    perror("Memory allocation failed");
+    exit(EXIT_FAILURE);
+  }
+
+  snprintf(str, 20, "%.2f", num);
+  return str;
+}
+#endif
 #endif // END OF STRING_IMP
