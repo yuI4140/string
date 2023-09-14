@@ -54,6 +54,17 @@ void popCountStr(String *a,uint32_t count);
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 char *intToString(int num);
 char *floatToString(float num);
+int32_t strToInt(String *str);
+float strToFloatPointer(String *str);
+#define HANDLER_CONVER_ERR(result)                                             \
+  do {                                                                         \
+    if ((errno == ERANGE &&                                                    \
+         ((result) == HUGE_VAL || (result) == -HUGE_VAL)) ||                   \
+        (errno != 0 && (result) == 0)) {                                       \
+      perror("Conversion error");                                              \
+      exit(EXIT_FAILURE);                                                      \
+    }                                                                          \
+  } while (0)
 #define NEW_STR(x)                                                             \
   _Generic((x),                                                                \
       int: newStr(intToString(x)),                                             \
@@ -149,6 +160,28 @@ void popCountStr(String *a,uint32_t count){
         --count;
     }  
 }
+
+void handlerResultConvertErr(String *str, String *endptr) {
+  if (strEq(str, endptr)) {
+    fprintf(stderr, "No digits found.\n");
+    exit(EXIT_FAILURE);
+  }
+}
+int32_t strToInt(String *str) {
+  String *handler = allocStr(256);
+  int32_t buffer = strtol(str->value, (char **)handler->value, 10);
+  HANDLER_CONVER_ERR(buffer);
+  handlerResultConvertErr(str, handler);
+  return buffer;
+}
+float strToFloatPointer(String *str) {
+  String *endptr = allocStr(256);
+  double float_num = strtod(str->value, (char **)endptr->value);
+  HANDLER_CONVER_ERR(float_num);
+  handlerResultConvertErr(str, endptr);
+  return float_num;
+}
+
 // the follow funcs are not especific from >=C11 but for not add garbage
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 char *intToString(int num) {
