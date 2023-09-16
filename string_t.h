@@ -53,6 +53,8 @@ void popStr(String *a);
 void popCountStr(String *a,uint32_t count);
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 #include <math.h>
+#include <errno.h>
+#include <
 char *intToString(int num);
 char *floatToString(float num);
 int32_t strToInt(String *str);
