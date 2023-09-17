@@ -1,4 +1,3 @@
-/*
 MIT License
 
 Copyright (c) 2023 yuI4140
@@ -45,17 +44,20 @@ String *newStr(const char arr[]);
 // compare two sets of strings
 bool strEq(String *a, String *b);
 // is the same as strsub of C++
-void strCut(String *str, uint32_t start, uint32_t end);
+void strCut(String *src, uint32_t start, uint32_t end);
 const char* c_str(String *str);
-void strConcat(String *a,String *b);
-void pushCharStr(String *a,char ch);
-void popStr(String *a);
-void popCountStr(String *a,uint32_t count);
+void strConcat(String *dest,String *src);
+void pushCharStr(String *dest,char ch);
+void pushCharpStr(String *dest,const char *chp);
+void popStr(String *src);
+void popCountStr(String *src,uint32_t count);
+String *intToString(int num);
+String *floatToString(float num);
+#define fiterate_str(str) for(size_t it=0;it<str->size;++it)
+#define witerate_str(str) size_t it=0;while(str->value[it]!='\0')
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 #include <math.h>
 #include <errno.h>
-char *intToString(int num);
-char *floatToString(float num);
 int32_t strToInt(String *str);
 float strToFloatPointer(String *str);
 #define HANDLER_CONVER_ERR(result)                                             \
@@ -69,9 +71,9 @@ float strToFloatPointer(String *str);
   } while (0)
 #define NEW_STR(x)                                                             \
   _Generic((x),                                                                \
-      int: newStr(intToString(x)),                                             \
-      float: newStr(floatToString(x)),                                         \
-      double: newStr(floatToString(x)),                                        \
+      int: intToString(x),                                             \
+      float: floatToString(x),                                         \
+      double: floatToString(x),                                        \
       default: NULL)
 #endif
 #ifdef STRING_IMP
@@ -104,26 +106,22 @@ char atStr(String *str, size_t index) {
 }
 void mvStr(String *dest,String *src){
     clearStr(dest);
-    dest->size=src->size; 
-    memmove(dest->value,src->value,src->size);
     dest->size=src->size;
+    memmove(dest->value,src->value,src->size);
 }
 void mvCharpToStr(String *dest,const char*src){
     clearStr(dest);
-    dest->size=strlen(src); 
+    dest->size=strlen(src);
     memmove(dest->value,src,strlen(src)-1);
     implicitStr(dest);
-} 
+}
 void implicitStr(String *str){
-       size_t lengh=strlen(str->value);  
+       size_t lengh=strlen(str->value);
        str->size=lengh;
 }
-void strConcat(String *a,String *b){
-    char *c=allocPtr(a->size+b->size*sizeof(char));
-    memcpy(c,a->value,a->size);
-    memcpy(c+strlen(c),b->value,b->size);
-    memmove(a->value,c,strlen(c));
-    implicitStr(a);
+void strConcat(String *dest,String *src){
+     memmove((char*)dest->value+dest->size,src->value,src->size);
+    implicitStr(dest);
 }
 String *newStr(const char arr[]){
     size_t size=strlen(arr);
@@ -134,33 +132,34 @@ String *newStr(const char arr[]){
 bool strEq(String *a, String *b){
     return memcmp(a->value,b->value,a->size)!=0?false:true;
 }
-void strCut(String *str, uint32_t start, uint32_t end) {
-    ptrWrapper(str);
-    assert(start < end && end <= str->size);
-    char *mv_str = str->value + start;
-    memmove(str->value, mv_str,end);
-    implicitStr(str);
+void strCut(String *src, uint32_t start, uint32_t end) {
+    ptrWrapper(src);
+    assert(start < end && end <= src->size);
+    memmove(src->value,(char*)src->value+start,end);
+    implicitStr(src);
 }
 
 const char* c_str(String *str){
-   str->value[str->size] = '\0';  
+   str->value[str->size] = '\0';
    return str->value;
 }
-void pushCharStr(String *a,char ch){
-    char *av=a->value;
-    memcpy(av+a->size,&ch,sizeof(char));
-    memcpy(a->value,av,strlen(av));
-    implicitStr(a);
+void pushCharStr(String *dest,char ch){
+    memcpy((char*)dest->value+dest->size,&ch,sizeof(char));
+    implicitStr(dest);
 }
-void popStr(String *a){
-    a->value[a->size-1]='\0'; 
-    implicitStr(a);
+void pushCharpStr(String *dest,const char *chp){
+    memcpy((char*)dest->value+dest->size,chp,strlen(chp));
+    implicitStr(dest);
 }
-void popCountStr(String *a,uint32_t count){
+void popStr(String *src){
+    src->value[src->size-1]='\0';
+    implicitStr(src);
+}
+void popCountStr(String *src,uint32_t count){
     while (count!=0) {
-        popStr(a);
+        popStr(src);
         --count;
-    }  
+    }
 }
 
 void handlerResultConvertErr(String *str, String *endptr) {
@@ -183,28 +182,16 @@ float strToFloatPointer(String *str) {
   handlerResultConvertErr(str, endptr);
   return float_num;
 }
-
-// the follow funcs are not especific from >=C11 but for not add garbage
-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-char *intToString(int num) {
-  char *str = (char *)malloc(20);
-  if (str == NULL) {
-    perror("Memory allocation failed");
-    exit(EXIT_FAILURE);
-  }
-
-  snprintf(str, 20, "%d", num);
+String *intToString(int num) {
+  String *str=allocStr(sizeof(int32_t));
+  snprintf((char*)str->value,str->size, "%d", num);
+  implicitStr(str);
   return str;
 }
-char *floatToString(float num) {
-  char *str = (char *)malloc(20);
-  if (str == NULL) {
-    perror("Memory allocation failed");
-    exit(EXIT_FAILURE);
-  }
-
-  snprintf(str, 20, "%.2f", num);
+String *floatToString(float num) {
+   String *str=allocStr(sizeof(double));
+  snprintf(str->value,str->size, "%.2f", num);
+  implicitStr(str);
   return str;
 }
-#endif
 #endif // END OF STRING_IMP
