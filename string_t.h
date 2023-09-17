@@ -55,6 +55,7 @@ String *intToString(int num);
 String *floatToString(float num);
 #define fiterate_str(str) for(size_t it=0;it<str->size;++it)
 #define witerate_str(str) size_t it=0;while(str->value[it]!='\0')
+void str_snprintf(String *buffer,const char* fmt,...);
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 #include <math.h>
 #include <errno.h>
@@ -193,5 +194,11 @@ String *floatToString(float num) {
   snprintf(str->value,str->size, "%.2f", num);
   implicitStr(str);
   return str;
+}
+void str_snprintf(String *buffer,const char* fmt,...){
+    va_list args;
+    va_start(args,fmt);
+    (void)vsnprintf((char*)buffer->value,buffer->size,fmt,args);
+    va_end(args); 
 }
 #endif // END OF STRING_IMP
