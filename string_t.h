@@ -21,11 +21,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include <assert.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdint.h>
 typedef struct String {
   size_t size;
   char value[];
@@ -56,6 +56,9 @@ String *floatToString(float num);
 #define fiterate_str(str) for(size_t it=0;it<str->size;++it)
 #define witerate_str(str) size_t it=0;while(str->value[it]!='\0')
 void str_snprintf(String *buffer,const char* fmt,...);
+void replaceCharStr(String *str,char old,char _new);
+#define MV_CHAR(dest,src) do{if(dest!=src){memcpy(&dest,&src,sizeof(char));src=0;}}while(0)
+#define CP_CHAR(dest,src) do{if(dest!=src){memcpy(&dest,&src,sizeof(char));}}while(0)
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 #include <math.h>
 #include <errno.h>
@@ -200,5 +203,12 @@ void str_snprintf(String *buffer,const char* fmt,...){
     va_start(args,fmt);
     (void)vsnprintf((char*)buffer->value,buffer->size,fmt,args);
     va_end(args); 
+}
+void replaceCharStr(String *str,char old,char _new){
+    fiterate_str(str){
+       if (atStr(str,it)==old) {
+           MV_CHAR(str->value[it],_new); 
+       } 
+    }
 }
 #endif // END OF STRING_IMP
