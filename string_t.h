@@ -58,7 +58,8 @@ String *floatToString(float num);
 void str_snprintf(String *buffer,const char* fmt,...);
 void replaceCharStr(String *str,char old,char _new);
 #define MV_CHAR(dest,src) do{if(dest!=src){memcpy(&dest,&src,sizeof(char));src=0;}}while(0)
-#define CP_CHAR(dest,src) do{if(dest!=src){memcpy(&dest,&src,sizeof(char));}}while(0)
+#define CP_CHAR(dest,src) do{if(dest!=src){memcpy(&dest,&src,sizeof(char));}}while(0) 
+size_t findCharStr(String *str, char ch); 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 #include <math.h>
 #include <errno.h>
@@ -210,5 +211,14 @@ void replaceCharStr(String *str,char old,char _new){
            MV_CHAR(str->value[it],_new); 
        } 
     }
-}
+} 
+size_t findCharStr(String *str, char ch) { 
+   fiterate_str(str) { 
+     if (atStr(str, it) == ch) { 
+       return it; 
+       break; 
+     } 
+   } 
+   return 0; 
+} 
 #endif // END OF STRING_IMP
