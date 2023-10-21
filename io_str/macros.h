@@ -14,15 +14,15 @@ void *mHandleIfReturn_s(void *expr,int32_t line,char* file);
 } while (0)
 void handleIf(bool condition, const char *condition_name, int line) {
   if (condition) {
-    fprintf(stdout, "[INFO] OK=>%s", condition_name);
+    fprintf(stdout, "[INFO] OK=>%s\n", condition_name);
   } else {
-    fprintf(stderr, "=>%s fail! At line:%d", condition_name, line);
+    fprintf(stderr, "[ERROR]=> %s fail! At line:%d\n", condition_name, line);
     exit(0);
   }
 }
 void *mHandleIfRetrn_s(void *expr,int32_t line,char* file){
     if (expr==NULL) {
-        fprintf(stderr,"expr was NULL pointer | L:%d | FILE: %s",line,file);
+        fprintf(stderr,"expr was NULL pointer | L:%d | FILE: %s\n",line,file);
         exit(1);
     } 
     return expr;
